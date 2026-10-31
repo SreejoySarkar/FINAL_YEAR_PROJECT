@@ -1,11 +1,9 @@
 .env
-.env.*
-!.env.example
-**/venv/
-**/.venv/
 __pycache__/
-*.py[cod]
+*.pyc
+secure_keys/
+db.sqlite3
 .pytest_cache/
-**/.pytest_cache/
-*.sqlite3
-media/
+tests/performance/fixtures.json
+venv/
+.venv/
