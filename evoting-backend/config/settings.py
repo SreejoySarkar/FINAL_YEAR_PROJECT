@@ -2,13 +2,17 @@ import sys
 from datetime import timedelta
 from pathlib import Path
 
-from decouple import config
+from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=Csv(),
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -141,22 +145,101 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),
 }
 
+ADMIN_OTP_SALT = config("ADMIN_OTP_SALT", default="admin-otp-session")
+ADMIN_OTP_VALID_MINUTES = config(
+    "ADMIN_OTP_VALID_MINUTES",
+    default=5,
+    cast=int,
+)
+ADMIN_OTP_MAX_ATTEMPTS = config(
+    "ADMIN_OTP_MAX_ATTEMPTS",
+    default=5,
+    cast=int,
+)
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Secure E-Voting API",
     "DESCRIPTION": "Backend APIs (Person 1: management, Person 2: voting)",
     "VERSION": "1.0.0",
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:3000,http://localhost:5173",
+    cast=Csv(),
+)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="",
+    cast=Csv(),
+)
 
 QR_SIGNING_KEY = config("QR_SIGNING_KEY")
+QR_TOKEN_SALT = config("QR_TOKEN_SALT", default="evoting-qr-token")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# OTP emails print in your terminal during development
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "noreply@evoting.local"
+MAILER_BACKEND = config(
+    "MAILER_BACKEND",
+    default=(
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
+)
+EMAIL_OPTIONS = {}
+if MAILER_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
+    EMAIL_OPTIONS = {
+        "host": config("EMAIL_HOST", default="localhost"),
+        "port": config("EMAIL_PORT", default=25, cast=int),
+        "username": config("EMAIL_HOST_USER", default=""),
+        "password": config("EMAIL_HOST_PASSWORD", default=""),
+        "use_tls": config("EMAIL_USE_TLS", default=False, cast=bool),
+        "use_ssl": config("EMAIL_USE_SSL", default=False, cast=bool),
+        "timeout": config("EMAIL_TIMEOUT", default=10, cast=int),
+    }
+
+MAILERS = {
+    "default": {
+        "BACKEND": MAILER_BACKEND,
+        "OPTIONS": EMAIL_OPTIONS,
+    },
+}
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="noreply@evoting.local",
+)
+
+SECURE_SSL_REDIRECT = config(
+    "SECURE_SSL_REDIRECT",
+    default=not DEBUG,
+    cast=bool,
+)
+SECURE_HSTS_SECONDS = config(
+    "SECURE_HSTS_SECONDS",
+    default=0,
+    cast=int,
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    default=False,
+    cast=bool,
+)
+SECURE_HSTS_PRELOAD = config(
+    "SECURE_HSTS_PRELOAD",
+    default=False,
+    cast=bool,
+)
+SESSION_COOKIE_SECURE = config(
+    "SESSION_COOKIE_SECURE",
+    default=not DEBUG,
+    cast=bool,
+)
+CSRF_COOKIE_SECURE = config(
+    "CSRF_COOKIE_SECURE",
+    default=not DEBUG,
+    cast=bool,
+)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"

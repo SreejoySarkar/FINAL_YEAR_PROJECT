@@ -8,9 +8,11 @@ from django.core import signing
 from django.core.mail import send_mail
 from django.utils import timezone
 
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import serializers
 from rest_framework.views import APIView
 
 from rest_framework_simplejwt.exceptions import TokenError
@@ -24,15 +26,22 @@ from .serializers import (
     VerifyOTPSerializer,
 )
 
-OTP_SALT = "admin-otp-session"
-OTP_VALID_MINUTES = 5
-MAX_OTP_ATTEMPTS = 5
-
-
 class AdminLoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        request=LoginSerializer,
+        responses={
+            200: inline_serializer(
+                name="AdminLoginResponse",
+                fields={
+                    "otp_required": serializers.BooleanField(),
+                    "otp_session": serializers.CharField(),
+                },
+            ),
+        },
+    )
     def post(self, request):
         s = LoginSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -66,7 +75,7 @@ class AdminLoginView(APIView):
             admin=admin,
             code_hash=make_password(code),
             expires_at=timezone.now() + timedelta(
-                minutes=OTP_VALID_MINUTES
+                minutes=settings.ADMIN_OTP_VALID_MINUTES
             )
         )
 
@@ -79,7 +88,7 @@ class AdminLoginView(APIView):
 
         session = signing.dumps(
             {"admin_id": admin.id},
-            salt=OTP_SALT
+            salt=settings.ADMIN_OTP_SALT
         )
 
         log_event("ADMIN_LOGIN_PASSWORD_OK", admin, {}, request)
@@ -94,6 +103,20 @@ class AdminVerifyOTPView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        request=VerifyOTPSerializer,
+        responses={
+            200: inline_serializer(
+                name="AdminVerifyOTPResponse",
+                fields={
+                    "access": serializers.CharField(),
+                    "refresh": serializers.CharField(),
+                    "role": serializers.CharField(),
+                    "username": serializers.CharField(),
+                },
+            ),
+        },
+    )
     def post(self, request):
         s = VerifyOTPSerializer(data=request.data)
         s.is_valid(raise_exception=True)
@@ -101,8 +124,8 @@ class AdminVerifyOTPView(APIView):
         try:
             data = signing.loads(
                 s.validated_data["otp_session"],
-                salt=OTP_SALT,
-                max_age=OTP_VALID_MINUTES * 60
+                salt=settings.ADMIN_OTP_SALT,
+                max_age=settings.ADMIN_OTP_VALID_MINUTES * 60
             )
         except signing.BadSignature:
             return Response(
@@ -122,7 +145,7 @@ class AdminVerifyOTPView(APIView):
         if (
             otp is None
             or otp.expires_at < timezone.now()
-            or otp.attempts >= MAX_OTP_ATTEMPTS
+            or otp.attempts >= settings.ADMIN_OTP_MAX_ATTEMPTS
         ):
             return Response(
                 {"detail": "OTP expired or locked. Log in again."},
@@ -159,6 +182,10 @@ class AdminVerifyOTPView(APIView):
 
 
 class AdminLogoutView(APIView):
+    @extend_schema(
+        request=LogoutSerializer,
+        responses={204: None},
+    )
     def post(self, request):
         s = LogoutSerializer(data=request.data)
         s.is_valid(raise_exception=True)

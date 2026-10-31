@@ -1,8 +1,10 @@
 from django.http import FileResponse
+from drf_spectacular.utils import OpenApiTypes, extend_schema, inline_serializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import serializers
 
 from accounts.permissions import roles
 from audit.services import log_event
@@ -16,6 +18,16 @@ class GenerateQRView(APIView):
 
     permission_classes = [roles("election_admin")]
 
+    @extend_schema(
+        request=None,
+        responses=inline_serializer(
+            name="GenerateQRResponse",
+            fields={
+                "created": serializers.IntegerField(),
+                "total": serializers.IntegerField(),
+            },
+        ),
+    )
     def post(self, request, election_id):
         election = get_object_or_404(Election, pk=election_id)
 
@@ -58,6 +70,7 @@ class DownloadQRView(APIView):
 
     permission_classes = [roles("election_admin", "org_admin")]
 
+    @extend_schema(responses=OpenApiTypes.BINARY)
     def get(self, request, election_id, voter_id):
         tok = get_object_or_404(
             QRToken,

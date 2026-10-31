@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, serializers
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from accounts.permissions import roles
 from .models import AuditLog
@@ -36,6 +37,17 @@ class AuditLogListView(generics.ListAPIView):
 class AuditVerifyView(APIView):
     permission_classes = [roles("auditor", "org_admin")]
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="AuditVerifyResponse",
+            fields={
+                "intact": serializers.BooleanField(),
+                "first_bad_record_id": serializers.IntegerField(
+                    allow_null=True,
+                ),
+            },
+        ),
+    )
     def get(self, request):
         ok, bad_id = verify_chain()
 

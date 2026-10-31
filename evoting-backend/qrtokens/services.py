@@ -9,9 +9,6 @@ from django.core.files.base import ContentFile
 from .models import QRToken
 
 
-QR_SALT = "evoting-qr-token"
-
-
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -20,7 +17,7 @@ def make_signed_token(jti, election_id, voter_id) -> str:
     return signing.dumps(
         {"jti": str(jti), "eid": election_id, "vid": voter_id},
         key=settings.QR_SIGNING_KEY,
-        salt=QR_SALT,
+        salt=settings.QR_TOKEN_SALT,
     )
 
 
@@ -29,7 +26,7 @@ def read_signed_token(token: str, max_age_seconds=None):
     return signing.loads(
         token,
         key=settings.QR_SIGNING_KEY,
-        salt=QR_SALT,
+        salt=settings.QR_TOKEN_SALT,
         max_age=max_age_seconds,
     )
 

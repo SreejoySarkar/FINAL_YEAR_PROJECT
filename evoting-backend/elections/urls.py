@@ -1,4 +1,5 @@
 from django.urls import include, path
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view
 from rest_framework.routers import DefaultRouter
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ router.register("elections", ElectionViewSet, basename="election")
 router.register("candidates", CandidateViewSet, basename="candidate")
 
 
+@extend_schema(responses=CandidateSerializer(many=True))
 @api_view(["GET"])
 def election_candidates(request, election_id):
     """

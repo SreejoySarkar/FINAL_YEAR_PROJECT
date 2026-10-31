@@ -8,6 +8,14 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework import serializers
+
 from accounts.permissions import roles
 from audit.services import log_event
 from elections.models import Election
@@ -44,6 +52,19 @@ class VoterCSVImportView(APIView):
     permission_classes = [roles("org_admin")]
     parser_classes = [MultiPartParser]
 
+    @extend_schema(
+        request=inline_serializer(
+            name="VoterCSVImportRequest",
+            fields={"file": serializers.FileField()},
+        ),
+        responses=inline_serializer(
+            name="VoterCSVImportResponse",
+            fields={
+                "created": serializers.IntegerField(),
+                "skipped": serializers.IntegerField(),
+            },
+        ),
+    )
     def post(self, request):
         f = request.FILES.get("file")
         if not f:
@@ -89,6 +110,7 @@ class ElectionEligibleVotersView(APIView):
             return [roles("election_admin", "org_admin", "auditor")()]
         return [roles("election_admin")()]
 
+    @extend_schema(responses=EligibilitySerializer(many=True))
     def get(self, request, election_id):
         qs = Eligibility.objects.filter(
             election_id=election_id
@@ -98,6 +120,13 @@ class ElectionEligibleVotersView(APIView):
             EligibilitySerializer(qs, many=True).data
         )
 
+    @extend_schema(
+        request=AddEligibleSerializer,
+        responses=inline_serializer(
+            name="EligibleVotersAddedResponse",
+            fields={"added": serializers.IntegerField()},
+        ),
+    )
     def post(self, request, election_id):
         election = get_object_or_404(Election, pk=election_id)
 
@@ -142,6 +171,23 @@ class EligibilityCheckView(APIView):
 
     permission_classes = [roles("election_admin", "org_admin")]
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="voter_code",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+            ),
+        ],
+        responses=inline_serializer(
+            name="EligibilityCheckResponse",
+            fields={
+                "eligible": serializers.BooleanField(),
+                "reason": serializers.CharField(allow_null=True),
+            },
+        ),
+    )
     def get(self, request, election_id):
         code = request.query_params.get("voter_code", "")
 
