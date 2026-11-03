@@ -1,9 +1,0 @@
-.env
-__pycache__/
-*.pyc
-secure_keys/
-db.sqlite3
-.pytest_cache/
-tests/performance/fixtures.json
-venv/
-.venv/
