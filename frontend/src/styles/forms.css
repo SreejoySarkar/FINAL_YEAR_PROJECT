@@ -1,0 +1,108 @@
+/* ============ Forms, modals, cards for specific pages ============ */
+
+/* modal (React-controlled, Bootstrap-look) */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1080;
+  background: rgba(6, 15, 30, 0.55);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 3rem 1rem 1.5rem; overflow-y: auto;
+}
+.modal-panel {
+  background: var(--surface); border-radius: var(--radius-lg);
+  width: 100%; max-width: 560px;
+  box-shadow: var(--shadow-lg);
+  animation: modal-in 0.18s ease-out;
+}
+.modal-panel.wide { max-width: 720px; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--line); }
+.modal-head h5 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.modal-body-pad { padding: 1.4rem; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--line); background: #fafcfe; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.modal-x { border: none; background: transparent; color: var(--ink-faint); padding: 0.25rem; border-radius: 8px; }
+.modal-x:hover { background: #eef1f6; color: var(--ink); }
+
+/* login page */
+.auth-wrap { min-height: 100vh; display: grid; grid-template-columns: 1fr; background: var(--navy-950); }
+@media (min-width: 992px) { .auth-wrap { grid-template-columns: 1.05fr 1fr; } }
+.auth-side {
+  background:
+    radial-gradient(700px 420px at 85% 0%, rgba(23, 184, 119, 0.14), transparent 60%),
+    linear-gradient(165deg, var(--navy-950), var(--navy-900) 60%, #0d2445);
+  color: #fff; padding: 3rem 2.5rem; display: flex; flex-direction: column; justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+.auth-form-col { background: var(--paper); display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; }
+.auth-card { width: 100%; max-width: 430px; }
+.auth-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
+.auth-list li { display: flex; gap: 0.85rem; align-items: flex-start; }
+.auth-list .tick { width: 34px; height: 34px; border-radius: 9px; background: rgba(23, 184, 119, 0.15); color: #45e0a2; display: flex; align-items: center; justify-content: center; flex: none; }
+.auth-list .t { color: #fff; font-weight: 700; font-size: 0.95rem; }
+.auth-list .d { color: #9fb2cb; font-size: 0.85rem; }
+
+.demo-hint {
+  background: #fdf3df; border: 1px dashed #e3c176; color: #6d4c0e;
+  border-radius: var(--radius-md); font-size: 0.82rem; padding: 0.75rem 0.9rem;
+}
+.demo-hint code { background: rgba(109, 76, 14, 0.1); padding: 0.05em 0.35em; border-radius: 5px; font-weight: 700; }
+
+/* candidate / ballot cards */
+.candidate-card {
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
+  display: flex; gap: 1rem; padding: 1.1rem 1.2rem; align-items: center;
+  transition: border-color 0.15s, box-shadow 0.15s; position: relative;
+}
+.candidate-card .form-check-input { position: absolute; right: 1rem; top: 1.1rem; width: 1.15em; height: 1.15em; }
+.candidate-card.selected { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(23, 184, 119, 0.16); background: #fbfefc; }
+.candidate-card:hover { border-color: #b9c8da; }
+.candidate-card.selected:hover { border-color: var(--green-500); }
+
+.cand-photo {
+  width: 58px; height: 58px; border-radius: 14px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: #fff;
+  background: linear-gradient(135deg, var(--navy-700), var(--navy-900));
+  overflow: hidden;
+}
+.cand-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.photo-drop {
+  border: 1.5px dashed #c3d0e0; border-radius: var(--radius-md);
+  padding: 1.4rem; text-align: center; color: var(--ink-faint); background: #fafcfe;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.photo-drop:hover { border-color: var(--navy-700); background: #f4f8fd; }
+.photo-drop.has-file { border-color: var(--green-500); color: var(--green-600); background: #f6fdf9; }
+
+/* election cards */
+.election-card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
+.election-card .top { padding: 1.2rem 1.3rem 0.9rem; flex: 1; }
+.election-card .foot { padding: 0.85rem 1.3rem; border-top: 1px solid var(--line); background: #fafcfe; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+
+/* QR panel */
+.qr-frame {
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
+  padding: 1.1rem; display: inline-block; box-shadow: var(--shadow-sm);
+}
+.qr-frame img { display: block; width: 240px; height: 240px; }
+.qr-pending {
+  width: 240px; height: 240px; border-radius: var(--radius-md);
+  border: 1.5px dashed #c3d0e0; display: flex; flex-direction: column; gap: 0.6rem;
+  align-items: center; justify-content: center; color: var(--ink-faint); background: #fafcfe;
+}
+
+/* token box */
+.token-box {
+  font-family: "Space Grotesk", monospace; font-weight: 700; letter-spacing: 0.06em;
+  background: var(--navy-950); color: #45e0a2; border-radius: var(--radius-md);
+  padding: 0.8rem 1rem; font-size: 0.98rem; user-select: all;
+}
+
+/* results */
+.result-row { display: grid; grid-template-columns: 1fr; gap: 0.35rem; margin-bottom: 1rem; }
+.result-bar { height: 10px; border-radius: 999px; background: #e8eef5; overflow: hidden; }
+.result-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--green-500), var(--green-600)); }
+
+.search-box { position: relative; }
+.search-box .search-icon { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--ink-faint); pointer-events: none; }
+.search-box .form-control { padding-left: 2.3rem; }
