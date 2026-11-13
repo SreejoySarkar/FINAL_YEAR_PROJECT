@@ -1,0 +1,18 @@
+venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.pytest_cache/
+media/
+db.sqlite3
+tokens_backup*.txt
+audit_*backup*.json
+# Sensitive environment backups and encryption keys
+.env_recovery_backup
+secure_keys/
+secure_keys
+
+# Generated Django static files
+staticfiles/
